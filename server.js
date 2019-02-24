@@ -3,8 +3,21 @@ var express = require("express");
 // Makes HTTP request for HTML page
 var axios = require("axios");
 var mongojs = require("mongojs");
+
+var PORT = process.env.PORT || 3000;
 // Database configuration
 var app = express();
+
+app.use(express.static("public"));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Set Handlebars.
+var exphbs = require("express-handlebars");
+
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
 
 var databaseUrl = "scraper";
 var collections = ["scrapedData"];
@@ -20,6 +33,16 @@ db.on("error", function(error) {
 // // mongoose.connect(MONGODB_URI);
 
 // Route
+app.get("/", function(req, res) {
+  db.scrapedData.find({}, function(error, found) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(found);
+      res.render("index");
+    }
+  });
+});
 app.get("/all", function(req, res) {
   db.scrapedData.find({}, function(error, found) {
     if (error) {
@@ -43,6 +66,7 @@ app.get("/scrape", function(req, res) {
       var title = $(element)
         .find("h2")
         .text();
+      console.log("+++++++++++++++++++++++++++++++++++++++++++");
       console.log(title);
       // In the currently selected element, look at its child elements (i.e., its a-tags),
       // then save the values for any "href" attributes that the child elements may have
@@ -68,42 +92,10 @@ app.get("/scrape", function(req, res) {
       );
     });
   });
-  res.send("Scrape Complete");
+  res.render("Scrape");
 });
 
 // // Listen on port 3000
-app.listen(3000, function() {
+app.listen(PORT, function() {
   console.log("App running on port 3000!");
 });
-
-// // axios.get("https://www.nytimes.com/").then(function(response) {
-// //   // Load the Response into cheerio and save it to a variable
-// //   // '$' becomes a shorthand for cheerio's selector commands, much like jQuery's '$'
-// //   var $ = cheerio.load(response.data);
-
-// //   // An empty array to save the data that we'll scrape
-// //   var results = [];
-// //   //   console.log(response.data);
-// //   // With cheerio, find each p-tag with the "title" class
-// //   // (i: iterator. element: the current element)
-// //   $("article.css-8atqhb").each(function(i, element) {
-// //     // Save the text of the element in a "title" variable
-// //     // var title = $(element).text();
-// //     // console.log($(element));
-// //     //     // In the currently selected element, look at its child elements (i.e., its a-tags),
-// //     //     // then save the values for any "href" attributes that the child elements may have
-// //     var link = $(element)
-// //       .children()
-// //       .attr("href");
-// //     console.log(link);
-
-// //     //     // Save these results in an object that we'll push into the results array we defined earlier
-// //     //     results.push({
-// //     //       title: title,
-// //     //       link: link
-// //     //     });
-// //   });
-
-// //   //   // Log the results once you've looped through each of the elements found with cheerio
-// //   //   console.log(results);
-// // });
