@@ -24,7 +24,7 @@ var collections = ["scrapedData"];
 
 var db = mongojs(databaseUrl, collections);
 db.on("error", function(error) {
-  console, log("Database Error:", error);
+  console.log("Database Error:", error);
 });
 
 // var MONGODB_URI =
